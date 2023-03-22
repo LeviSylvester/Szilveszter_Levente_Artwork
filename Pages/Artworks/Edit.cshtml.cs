@@ -11,7 +11,7 @@ using Szilveszter_Levente_Artwork.Models;
 
 namespace Szilveszter_Levente_Artwork.Pages.Artworks
 {
-    public class EditModel : PageModel
+    public class EditModel : ArtworkCategoriesPageModel
     {
         private readonly Szilveszter_Levente_Artwork.Data.Szilveszter_Levente_ArtworkContext _context;
 
@@ -21,7 +21,7 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
         }
 
         [BindProperty]
-        public Artwork Artwork { get; set; } = default!;
+        public Artwork Artwork { get; set; } /*= default!;*/
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -31,7 +31,12 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             }
 
             //var artwork =  await _context.Artwork.FirstOrDefaultAsync(m => m.ID == id);
-            Artwork = await _context.Artwork.FirstOrDefaultAsync(m => m.ID == id);
+            Artwork = await _context.Artwork/*.FirstOrDefaultAsync(m => m.ID == id);*/
+                .Include(a => a.Venue)
+                .Include(a => a.ArtworkCategories)
+                    .ThenInclude(a => a.Category)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ID == id);
 
             //if (artwork == null)
             if (Artwork == null)
@@ -39,21 +44,26 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
                 return NotFound();
             }
 
+            //get checkbox data
+            PopulateAssignedCategoryData(_context, Artwork);
+
             //Artwork = artwork;
-            ViewData["VenueID"] = new SelectList(_context.Set<Venue>(), "ID", "VenueName");
+            ViewData["VenueID"] = new SelectList(_context/*.Set<Venue>()*/.Venue, "ID", "VenueName");
 
             return Page();
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        //public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int? id, string[] selectedCategories)
         {
             /*if (!ModelState.IsValid)
             {
                 return Page();
             }*/
 
+            /*
             _context.Attach(Artwork).State = EntityState.Modified;
 
             try
@@ -73,11 +83,43 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             }
 
             return RedirectToPage("./Index");
-        }
+            */
 
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var artworkToUpdate = await _context.Artwork
+                .Include(i => i.Venue)
+                .Include(i => i.ArtworkCategories)
+                    .ThenInclude(i => i.Category)
+                .FirstOrDefaultAsync(s => s.ID == id);
+
+            if (artworkToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            if (await TryUpdateModelAsync<Artwork>(artworkToUpdate, "Artwork",
+                i => i.Title, i => i.Artist,
+                 i => i.Price, i => i.CompletionDate, i => i.Venue))
+            {
+                UpdateArtworkCategories(_context, selectedCategories, artworkToUpdate);
+                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
+            }
+
+            //to also add checkbox data when editing an artwork
+            UpdateArtworkCategories(_context, selectedCategories, artworkToUpdate);
+            PopulateAssignedCategoryData(_context, artworkToUpdate);
+            return Page();
+        }
+        /*
         private bool ArtworkExists(int id)
         {
           return (_context.Artwork?.Any(e => e.ID == id)).GetValueOrDefault();
         }
+        */
     }
 }
