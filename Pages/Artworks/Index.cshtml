@@ -1,8 +1,8 @@
-﻿@page "/{id:int?}"
+﻿@page "/"
 @model Szilveszter_Levente_Artwork.Pages.Artworks.IndexModel
 
 @{
-    ViewData["Title"] = "Artworks";
+    ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
@@ -10,14 +10,25 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by Artwork Title / Artist Name:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-page="./Index">Back to full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.TitleSort">
                 @Html.DisplayNameFor(model => model.Artwork[0].Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Artwork[0].Artist)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].Price)
@@ -25,8 +36,13 @@
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].CompletionDate)
             </th>
+            <th colspan ="2">
+                <a asp-page="./Index" asp-route-sortOrder="@Model.ArtistSort">
+                @Html.DisplayNameFor(model => model.Artwork[0].Artist)
+                </a>
+            </th>            
             <th>
-                @Html.DisplayNameFor(model => model.Artwork[0].Venue/*.VenueName*/)
+                @Html.DisplayNameFor(model => model.Artwork[0].Venue)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].ArtworkCategories)
@@ -35,7 +51,7 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model/*.Artwork*/.ArtworkD.Artworks) {
+@foreach (var item in Model.ArtworkD.Artworks) {
 
     string selectedRow = "";
         if (item.ID == Model.ArtworkID)
@@ -43,19 +59,18 @@
             selectedRow = "table-success";
         }
 
-        <!--<tr>-->
         <tr class="@selectedRow">        
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Artist)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CompletionDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Artist.FullName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Venue.VenueName)

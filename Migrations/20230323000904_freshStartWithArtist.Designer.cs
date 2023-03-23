@@ -12,8 +12,8 @@ using Szilveszter_Levente_Artwork.Data;
 namespace Szilveszter_Levente_Artwork.Migrations
 {
     [DbContext(typeof(Szilveszter_Levente_ArtworkContext))]
-    [Migration("20230322161413_ArtVenueAndCategory")]
-    partial class ArtVenueAndCategory
+    [Migration("20230323000904_freshStartWithArtist")]
+    partial class freshStartWithArtist
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,6 +24,27 @@ namespace Szilveszter_Levente_Artwork.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Szilveszter_Levente_Artwork.Models.Artist", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Artist");
+                });
+
             modelBuilder.Entity("Szilveszter_Levente_Artwork.Models.Artwork", b =>
                 {
                     b.Property<int>("ID")
@@ -32,9 +53,9 @@ namespace Szilveszter_Levente_Artwork.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
-                    b.Property<string>("Artist")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ArtistID")
+                        .HasMaxLength(50)
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CompletionDate")
                         .HasColumnType("datetime2");
@@ -44,12 +65,15 @@ namespace Szilveszter_Levente_Artwork.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<int>("VenueID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ArtistID");
 
                     b.HasIndex("VenueID");
 
@@ -105,7 +129,6 @@ namespace Szilveszter_Levente_Artwork.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
                     b.Property<string>("VenueName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -115,11 +138,19 @@ namespace Szilveszter_Levente_Artwork.Migrations
 
             modelBuilder.Entity("Szilveszter_Levente_Artwork.Models.Artwork", b =>
                 {
+                    b.HasOne("Szilveszter_Levente_Artwork.Models.Artist", "Artist")
+                        .WithMany("Artworks")
+                        .HasForeignKey("ArtistID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Szilveszter_Levente_Artwork.Models.Venue", "Venue")
                         .WithMany("Artworks")
                         .HasForeignKey("VenueID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Artist");
 
                     b.Navigation("Venue");
                 });
@@ -141,6 +172,11 @@ namespace Szilveszter_Levente_Artwork.Migrations
                     b.Navigation("Artwork");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Szilveszter_Levente_Artwork.Models.Artist", b =>
+                {
+                    b.Navigation("Artworks");
                 });
 
             modelBuilder.Entity("Szilveszter_Levente_Artwork.Models.Artwork", b =>

@@ -1,19 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Szilveszter_Levente_Artwork.Migrations
 {
-    public partial class ArtVenueAndCategory : Migration
+    public partial class freshStartWithArtist : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "VenueID",
-                table: "Artwork",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.CreateTable(
+                name: "Artist",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Artist", x => x.ID);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Category",
@@ -34,11 +42,40 @@ namespace Szilveszter_Levente_Artwork.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    VenueName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    VenueName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Venue", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Artwork",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    ArtistID = table.Column<int>(type: "int", maxLength: 50, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
+                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    VenueID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Artwork", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Artwork_Artist_ArtistID",
+                        column: x => x.ArtistID,
+                        principalTable: "Artist",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Artwork_Venue_VenueID",
+                        column: x => x.VenueID,
+                        principalTable: "Venue",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -68,6 +105,11 @@ namespace Szilveszter_Levente_Artwork.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Artwork_ArtistID",
+                table: "Artwork",
+                column: "ArtistID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Artwork_VenueID",
                 table: "Artwork",
                 column: "VenueID");
@@ -81,38 +123,24 @@ namespace Szilveszter_Levente_Artwork.Migrations
                 name: "IX_ArtworkCategory_CategoryID",
                 table: "ArtworkCategory",
                 column: "CategoryID");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Artwork_Venue_VenueID",
-                table: "Artwork",
-                column: "VenueID",
-                principalTable: "Venue",
-                principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Artwork_Venue_VenueID",
-                table: "Artwork");
-
             migrationBuilder.DropTable(
                 name: "ArtworkCategory");
 
             migrationBuilder.DropTable(
-                name: "Venue");
+                name: "Artwork");
 
             migrationBuilder.DropTable(
                 name: "Category");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Artwork_VenueID",
-                table: "Artwork");
+            migrationBuilder.DropTable(
+                name: "Artist");
 
-            migrationBuilder.DropColumn(
-                name: "VenueID",
-                table: "Artwork");
+            migrationBuilder.DropTable(
+                name: "Venue");
         }
     }
 }

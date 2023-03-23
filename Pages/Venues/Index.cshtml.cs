@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Szilveszter_Levente_Artwork.Data;
 using Szilveszter_Levente_Artwork.Models;
+using Szilveszter_Levente_Artwork.Models.ViewModels;
 
 namespace Szilveszter_Levente_Artwork.Pages.Venues
 {
@@ -19,13 +20,26 @@ namespace Szilveszter_Levente_Artwork.Pages.Venues
             _context = context;
         }
 
-        public IList<Venue> Venue { get;set; } = default!;
+        public IList<Venue> Venue { get;set; } /*= default!;*/
 
-        public async Task OnGetAsync()
+        public VenueIndexData VenueData { get; set; }
+        public int VenueID { get; set; }
+        public int ArtworkID { get; set; }
+
+        public async Task OnGetAsync(int? id, int? ArtworkID)
         {
-            if (_context.Venue != null)
+            VenueData = new VenueIndexData();
+            VenueData.Venues = await _context.Venue
+                .Include(i => i.Artworks)
+                    .ThenInclude(c => c.Artist)
+                .OrderBy(i => i.VenueName)
+                .ToListAsync();
+            if (id != null)
             {
-                Venue = await _context.Venue.ToListAsync();
+                VenueID = id.Value;
+                Venue venue = VenueData.Venues
+                .Where(i => i.ID == id.Value).Single();
+                VenueData.Artworks = venue.Artworks;
             }
         }
     }
