@@ -21,24 +21,23 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
         }
 
         [BindProperty]
-        public Artwork Artwork { get; set; } /*= default!;*/
+        public Artwork? Artwork { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null/* || _context.Artwork == null*/)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            //var artwork =  await _context.Artwork.FirstOrDefaultAsync(m => m.ID == id);
-            Artwork = await _context.Artwork/*.FirstOrDefaultAsync(m => m.ID == id);*/
+            Artwork = await _context.Artwork
+                .Include(a => a.Artist)
                 .Include(a => a.Venue)
                 .Include(a => a.ArtworkCategories)
                     .ThenInclude(a => a.Category)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
 
-            //if (artwork == null)
             if (Artwork == null)
             {
                 return NotFound();
@@ -47,43 +46,16 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             //get checkbox data
             PopulateAssignedCategoryData(_context, Artwork);
 
-            //Artwork = artwork;
-            ViewData["VenueID"] = new SelectList(_context/*.Set<Venue>()*/.Venue, "ID", "VenueName");
+            ViewData["ArtistID"] = new SelectList(_context.Artist, "ID", "FullName");
+            ViewData["VenueID"] = new SelectList(_context.Venue, "ID", "VenueName");            
 
             return Page();
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
-        //public async Task<IActionResult> OnPostAsync()
         public async Task<IActionResult> OnPostAsync(int? id, string[] selectedCategories)
         {
-            /*if (!ModelState.IsValid)
-            {
-                return Page();
-            }*/
-
-            /*
-            _context.Attach(Artwork).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ArtworkExists(Artwork.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return RedirectToPage("./Index");
-            */
 
             if (id == null)
             {
@@ -91,6 +63,7 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             }
 
             var artworkToUpdate = await _context.Artwork
+                .Include(i => i.Artist)
                 .Include(i => i.Venue)
                 .Include(i => i.ArtworkCategories)
                     .ThenInclude(i => i.Category)
@@ -102,8 +75,8 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             }
 
             if (await TryUpdateModelAsync<Artwork>(artworkToUpdate, "Artwork",
-                i => i.Title, i => i.Artist,
-                 i => i.Price, i => i.CompletionDate, i => i.Venue))
+                i => i.Title, i => i.ArtistID,
+                 i => i.Price, i => i.CompletionDate, i => i.VenueID))
             {
                 UpdateArtworkCategories(_context, selectedCategories, artworkToUpdate);
                 await _context.SaveChangesAsync();
@@ -115,11 +88,5 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
             PopulateAssignedCategoryData(_context, artworkToUpdate);
             return Page();
         }
-        /*
-        private bool ArtworkExists(int id)
-        {
-          return (_context.Artwork?.Any(e => e.ID == id)).GetValueOrDefault();
-        }
-        */
     }
 }

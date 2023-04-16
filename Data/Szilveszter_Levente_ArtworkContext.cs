@@ -19,5 +19,7 @@ namespace Szilveszter_Levente_Artwork.Data
         public DbSet<Szilveszter_Levente_Artwork.Models.Venue>? Venue { get; set; }
 
         public DbSet<Szilveszter_Levente_Artwork.Models.Category>? Category { get; set; }
+
+        public DbSet<Szilveszter_Levente_Artwork.Models.Artist>? Artist { get; set; }
     }
 }

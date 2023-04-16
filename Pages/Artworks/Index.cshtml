@@ -38,11 +38,11 @@
             </th>
             <th colspan ="2">
                 <a asp-page="./Index" asp-route-sortOrder="@Model.ArtistSort">
-                @Html.DisplayNameFor(model => model.Artwork[0].Artist)
+                @Html.DisplayNameFor(model => model.Artwork[0].Artist.FullName)
                 </a>
             </th>            
             <th>
-                @Html.DisplayNameFor(model => model.Artwork[0].Venue)
+                @Html.DisplayNameFor(model => model.Artwork[0].Venue.VenueName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].ArtworkCategories)

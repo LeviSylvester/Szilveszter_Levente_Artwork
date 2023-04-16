@@ -20,9 +20,10 @@
                 <span asp-validation-for="Artwork.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Artwork.Artist" class="control-label"></label>
-                <input asp-for="Artwork.Artist" class="form-control" />
-                <span asp-validation-for="Artwork.Artist" class="text-danger"></span>
+                <label asp-for="Artwork.ArtistID" class="control-label">Artist FullName</label>
+                <select asp-for="Artwork.ArtistID" class="form-control" asp-items="ViewBag.ArtistID">
+                </select>
+                <span asp-validation-for="Artwork.ArtistID" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Artwork.Price" class="control-label"></label>
@@ -35,7 +36,7 @@
                 <span asp-validation-for="Artwork.CompletionDate" class="textdanger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Artwork.VenueID" class="control-label"><!--Venue Name--></label>
+                <label asp-for="Artwork.VenueID" class="control-label">Venue Name</label>
                 <select asp-for="Artwork.VenueID" class="form-control" asp-items="ViewBag.VenueID">
                 </select>
                 <span asp-validation-for="Artwork.VenueID" class="text-danger"></span>

@@ -9,7 +9,7 @@ namespace Szilveszter_Levente_Artwork.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        [Display(Name = "Full Name")]
+        //[Display(Name = "Full Name")]
         public string FullName
         {
             get

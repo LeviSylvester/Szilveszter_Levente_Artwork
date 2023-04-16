@@ -21,35 +21,24 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
 
         public IActionResult OnGet()
         {
-            ViewData["VenueID"] = new SelectList(_context/*.Set<Venue>()*/.Venue, "ID", "VenueName");
+            ViewData["ArtistID"] = new SelectList(_context.Artist, "ID", "FullName");
+            ViewData["VenueID"] = new SelectList(_context.Venue, "ID", "VenueName");            
 
             //inserted
             var artwork = new Artwork();
             artwork.ArtworkCategories = new List<ArtworkCategory>();
 
             PopulateAssignedCategoryData(_context, artwork);
-            //
 
             return Page();
         }
 
         [BindProperty]
-        public Artwork? Artwork { get; set; } /*= default!;*/
+        public Artwork? Artwork { get; set; }
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync(string[] selectedCategories)
         {
-            /*if (!ModelState.IsValid || _context.Artwork == null || Artwork == null)
-              {
-                  return Page();
-              }*/
-
-            /*
-            _context.Artwork.Add(Artwork);
-            await _context.SaveChangesAsync();
-
-            return RedirectToPage("./Index");
-            */
 
             var newArtwork = new Artwork();
             if (selectedCategories != null)
@@ -65,8 +54,8 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
                 }
             }
 
-            if (await TryUpdateModelAsync<Artwork>(newArtwork, "Artwork",
-                i => i.Title, i => i.Artist,
+            if (!await TryUpdateModelAsync<Artwork>(newArtwork, "Artwork",
+                i => i.Title, i => i.ArtistID,
                  i => i.Price, i => i.CompletionDate, i => i.VenueID))
             {                
                 _context.Artwork.Add(newArtwork);
