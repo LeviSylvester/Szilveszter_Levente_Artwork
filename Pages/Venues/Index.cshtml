@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{id:int?}"
 @model Szilveszter_Levente_Artwork.Pages.Venues.IndexModel
 
 @{
@@ -20,12 +20,20 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Venue) {
-        <tr>
+@foreach (var item in Model.VenueData.Venues) 
+{
+        string selectedRow = "";
+        if (item.ID == Model.VenueID)
+        {
+            selectedRow = "table-success";
+        }    
+        <tr class ="@selectedRow">
             <td>
                 @Html.DisplayFor(modelItem => item.VenueName)
             </td>
+
             <td>
+                <a asp-page="./Index" asp-route-id="@item.ID">Select</a> |
                 <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |
                 <a asp-page="./Delete" asp-route-id="@item.ID">Delete</a>
@@ -34,3 +42,33 @@
 }
     </tbody>
 </table>
+
+@if (Model.VenueData.Artworks != null)
+{
+    <h3>Artworks Edited by Selected Venue</h3>
+    <table class="table">
+
+        @foreach (var item in Model.VenueData.Venues)
+        {
+            string selectedRow = "";
+            if (item.ID == Model.VenueID)
+            {
+                selectedRow = "table-success";
+            }
+            <tr class="@selectedRow">
+
+                <td>
+                    @{
+                        foreach (var a in item.Artworks)
+                        {
+
+                            @a.Title @: @a.Artist.FullName
+
+                            <br />
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}

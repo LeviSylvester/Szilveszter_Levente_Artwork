@@ -10,7 +10,7 @@ using Szilveszter_Levente_Artwork.Models;
 
 namespace Szilveszter_Levente_Artwork.Pages.Artworks
 {
-    public class CreateModel : PageModel
+    public class CreateModel : ArtworkCategoriesPageModel
     {
         private readonly Szilveszter_Levente_Artwork.Data.Szilveszter_Levente_ArtworkContext _context;
 
@@ -21,26 +21,51 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
 
         public IActionResult OnGet()
         {
-            ViewData["VenueID"] = new SelectList(_context.Set<Venue>(), "ID", "VenueName");
+            ViewData["ArtistID"] = new SelectList(_context.Artist, "ID", "FullName");
+            ViewData["VenueID"] = new SelectList(_context.Venue, "ID", "VenueName");            
+
+            //inserted
+            var artwork = new Artwork();
+            artwork.ArtworkCategories = new List<ArtworkCategory>();
+
+            PopulateAssignedCategoryData(_context, artwork);
+
             return Page();
         }
 
         [BindProperty]
-        public Artwork Artwork { get; set; } = default!;
-        
+        public Artwork? Artwork { get; set; }
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(string[] selectedCategories)
         {
-          /*if (!ModelState.IsValid || _context.Artwork == null || Artwork == null)
+
+            var newArtwork = new Artwork();
+            if (selectedCategories != null)
             {
-                return Page();
-            }*/
+                newArtwork.ArtworkCategories = new List<ArtworkCategory>();
+                foreach (var cat in selectedCategories)
+                {
+                    var catToAdd = new ArtworkCategory
+                    {
+                        CategoryID = int.Parse(cat)
+                    };
+                    newArtwork.ArtworkCategories.Add(catToAdd);
+                }
+            }
 
-            _context.Artwork.Add(Artwork);
-            await _context.SaveChangesAsync();
+            if (!await TryUpdateModelAsync<Artwork>(newArtwork, "Artwork",
+                i => i.Title, i => i.ArtistID,
+                 i => i.Price, i => i.CompletionDate, i => i.VenueID))
+            {                
+                _context.Artwork.Add(newArtwork);
+                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
+                
+            }
 
-            return RedirectToPage("./Index");
+            PopulateAssignedCategoryData(_context, newArtwork);
+            return Page();
         }
     }
 }

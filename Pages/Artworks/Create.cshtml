@@ -19,9 +19,10 @@
                 <span asp-validation-for="Artwork.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Artwork.Artist" class="control-label"></label>
-                <input asp-for="Artwork.Artist" class="form-control" />
-                <span asp-validation-for="Artwork.Artist" class="text-danger"></span>
+                <label asp-for="Artwork.ArtistID" class="control-label">Artist FullName</label>
+                <select asp-for="Artwork.ArtistID" class="form-control" asp-items="ViewBag.ArtistID">
+                </select>
+                <span asp-validation-for="Artwork.ArtistID" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Artwork.Price" class="control-label"></label>
@@ -39,6 +40,33 @@
                 </select>
                 <span asp-validation-for="Artwork.VenueID" class="text-danger"></span>
             </div>
+                <div class="form-group">
+                    <div class="table">
+                        <table>
+                            <tr>
+                                @{
+                                    int cnt = 0;
+
+                                    foreach (var cat in Model.AssignedCategoryDataList)
+                                    {
+                                        if (cnt++ % 3 == 0)
+                                        {
+                                        @:</tr><tr>
+                                        }
+                                        @:<td>
+                                            <input type="checkbox"
+                                                   name="selectedCategories"
+                                                   value="@cat.CategoryID"
+                                                   @(Html.Raw(cat.Assigned ? "checked=\"checked\"" : "")) />
+                                        @cat.CategoryID @: @cat.Name
+                                    @:</td>
+                                }
+                            @:</tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

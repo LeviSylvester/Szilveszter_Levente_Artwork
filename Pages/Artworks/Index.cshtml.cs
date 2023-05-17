@@ -20,15 +20,60 @@ namespace Szilveszter_Levente_Artwork.Pages.Artworks
         }
 
         public IList<Artwork> Artwork { get;set; } = default!;
+        public ArtworkData ArtworkD { get; set; }
+        public int ArtworkID { get; set; }
+        public int CategoryID { get; set; }
 
-        public async Task OnGetAsync()
+        public string TitleSort { get; set; }
+        public string ArtistSort { get; set; }
+
+        public string CurrentFilter { get; set; }
+
+
+        public async Task OnGetAsync(int? id, int? categoryID, string sortOrder, string searchString)
         {
-            //if (_context.Artwork != null)
-            //{
-                Artwork = await _context.Artwork
-                .Include(a=>a.Venue)
+
+            ArtworkD = new ArtworkData();
+
+            TitleSort = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
+            ArtistSort = String.IsNullOrEmpty(sortOrder) ? "artist_desc" : "";
+
+            CurrentFilter = searchString;
+
+            ArtworkD.Artworks = await _context.Artwork
+                .Include(a => a.Artist)
+                .Include(a => a.Venue)
+                .Include(a => a.ArtworkCategories)
+                    .ThenInclude(a => a.Category)
+                .AsNoTracking()
+                .OrderBy(a => a.Title)
                 .ToListAsync();
-            //}
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                ArtworkD.Artworks = ArtworkD.Artworks.Where(s => s.Artist.FirstName.Contains(searchString)
+                                                               || s.Artist.LastName.Contains(searchString)
+                                                               || s.Title.Contains(searchString));
+            }
+
+            if (id != null)
+            {
+                ArtworkID = id.Value;
+                Artwork artwork = ArtworkD.Artworks
+                    .Where(i => i.ID == id.Value).Single();
+                ArtworkD.Categories = artwork.ArtworkCategories.Select(s => s.Category);
+            }
+
+            switch (sortOrder)
+            {
+                case "title_desc":
+                    ArtworkD.Artworks = ArtworkD.Artworks.OrderByDescending(s => s.Title);
+                    break;
+                case "artist_desc":
+                    ArtworkD.Artworks = ArtworkD.Artworks.OrderByDescending(s => s.Artist.FullName);
+                    break;
+
+            }
         }
     }
 }

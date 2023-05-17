@@ -10,14 +10,25 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by Artwork Title / Artist Name:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-page="./Index">Back to full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.TitleSort">
                 @Html.DisplayNameFor(model => model.Artwork[0].Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Artwork[0].Artist)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].Price)
@@ -25,20 +36,32 @@
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].CompletionDate)
             </th>
+            <th colspan ="2">
+                <a asp-page="./Index" asp-route-sortOrder="@Model.ArtistSort">
+                @Html.DisplayNameFor(model => model.Artwork[0].Artist.FullName)
+                </a>
+            </th>            
             <th>
                 @Html.DisplayNameFor(model => model.Artwork[0].Venue.VenueName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Artwork[0].ArtworkCategories)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Artwork) {
-        <tr>
+@foreach (var item in Model.ArtworkD.Artworks) {
+
+    string selectedRow = "";
+        if (item.ID == Model.ArtworkID)
+        {
+            selectedRow = "table-success";
+        }
+
+        <tr class="@selectedRow">        
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Artist)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)
@@ -47,7 +70,18 @@
                 @Html.DisplayFor(modelItem => item.CompletionDate)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Artist.FullName)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Venue.VenueName)
+            </td>
+            <td>
+                @{
+                    foreach (var category in item.ArtworkCategories)
+                    {
+                        @category.Category.ID @: @category.Category.CategoryName <br />
+                    }
+                }
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
